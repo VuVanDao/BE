@@ -1,0 +1,13 @@
+{
+  "name": "BE",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "backend-trello",
+  "main": "src/server.js",
+  "author": "VanDao",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
