@@ -5,10 +5,10 @@
  */
 
 //gBavtrTf4GpxVrAg
-const mongoDb_uri =
-  "mongodb+srv://vuvandao:gBavtrTf4GpxVrAg@cluster0.6cgid.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-const databaseName = "trello-BE";
+const mongoDb_uri = env.MONGODB_URI;
+const databaseName = env.DATABASE_NAME;
 import { MongoClient, ServerApiVersion } from "mongodb";
+import { env } from "./environment";
 
 let trelloDatabaseInstance = null;
 const mongoClientInstance = new MongoClient(mongoDb_uri, {
@@ -27,4 +27,8 @@ export const GET_DB = () => {
     throw new Error("Cannot connect your database");
   }
   return trelloDatabaseInstance;
+};
+export const CLOSE_DB = async () => {
+  console.log("haha");
+  await mongoClientInstance.close();
 };
