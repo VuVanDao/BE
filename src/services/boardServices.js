@@ -1,4 +1,5 @@
 import { StatusCodes } from "http-status-codes";
+import { cloneDeep } from "lodash";
 import { boardModel } from "~/models/BoardModel";
 import ApiError from "~/utils/ApiError";
 import slugify from "~/utils/formatter";
@@ -29,7 +30,16 @@ const getDetail = async (boardId) => {
     if (!board) {
       throw new ApiError(StatusCodes.NOT_FOUND, "Board not found");
     }
-    return board;
+    const resBoard = cloneDeep(board);
+    resBoard.columns.forEach((column) => {
+      column.cards = resBoard.cards.filter(
+        (card) => card.columnId.toString() === column._id.toString()
+      );
+    });
+    delete resBoard.cards;
+    console.log("resBoard", resBoard);
+
+    return resBoard;
   } catch (error) {
     throw error;
   }

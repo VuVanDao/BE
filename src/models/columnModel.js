@@ -30,3 +30,6 @@ export const columnModel = {
   COLUMN_COLLECTION_NAME,
   COLUMN_COLLECTION_SCHEMA,
 };
+// boardId: 67ea6a00609bdbb7c46dfbda,
+//columnId: 67ea732d65b019c23d640d11,
+// cardId:67ea742765b019c23d640d13
