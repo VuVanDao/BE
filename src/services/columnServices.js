@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { cloneDeep } from "lodash";
+import { boardModel } from "~/models/BoardModel";
 import { columnModel } from "~/models/columnModel";
 import ApiError from "~/utils/ApiError";
 
@@ -8,10 +8,16 @@ const createNew = async (reqBody) => {
     const newColumn = {
       ...reqBody,
     };
+
     const createdColumn = await columnModel.createNew(newColumn);
+
     const getNewColumn = await columnModel.findOneByID(
       createdColumn.insertedId
     );
+    if (getNewColumn) {
+      getNewColumn.cards = [];
+      await boardModel.pushColumnOderIds(getNewColumn);
+    }
     return getNewColumn;
   } catch (error) {
     throw error;

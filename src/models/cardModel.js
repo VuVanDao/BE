@@ -31,10 +31,15 @@ const CARD_COLLECTION_SCHEMA = Joi.object({
 const createNew = async (data) => {
   try {
     const validateData = await validateBeforeCreate(data);
-    const createdBoard = await GET_DB()
+    const newCardToAdd = {
+      ...validateData,
+      boardId: new ObjectId(validateData.boardId),
+      columnId: new ObjectId(validateData.columnId),
+    };
+    const createdCard = await GET_DB()
       .collection(CARD_COLLECTION_NAME)
-      .insertOne(validateData);
-    return createdBoard;
+      .insertOne(newCardToAdd);
+    return createdCard;
   } catch (error) {
     throw new Error(error);
   }

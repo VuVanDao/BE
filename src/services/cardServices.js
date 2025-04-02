@@ -1,9 +1,9 @@
 import { StatusCodes } from "http-status-codes";
 import { cloneDeep } from "lodash";
 import { cardModel } from "~/models/cardModel";
+import { columnModel } from "~/models/columnModel";
 
 import ApiError from "~/utils/ApiError";
-import slugify from "~/utils/formatter";
 
 const createNew = async (reqBody) => {
   try {
@@ -12,7 +12,9 @@ const createNew = async (reqBody) => {
     };
     const createdCard = await cardModel.createNew(newCard);
     const getNewCard = await cardModel.findOneByID(createdCard.insertedId);
-
+    if (getNewCard) {
+      await columnModel.pushCardOderIds(getNewCard);
+    }
     return getNewCard;
   } catch (error) {
     throw error;

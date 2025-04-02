@@ -30,10 +30,14 @@ const COLUMN_COLLECTION_SCHEMA = Joi.object({
 const createNew = async (data) => {
   try {
     const validateData = await validateBeforeCreate(data);
-    const createdBoard = await GET_DB()
+    const newColumnToAdd = {
+      ...validateData,
+      boardId: new ObjectId(validateData.boardId),
+    };
+    const createdColumn = await GET_DB()
       .collection(COLUMN_COLLECTION_NAME)
-      .insertOne(validateData);
-    return createdBoard;
+      .insertOne(newColumnToAdd);
+    return createdColumn;
   } catch (error) {
     throw new Error(error);
   }
@@ -53,11 +57,26 @@ const validateBeforeCreate = async (data) => {
     abortEarly: false,
   });
 };
+const pushCardOderIds = async (card) => {
+  try {
+    const result = await GET_DB()
+      .collection(COLUMN_COLLECTION_NAME)
+      .findOneAndUpdate(
+        { _id: new ObjectId(card.columnId) },
+        { $push: { cardOrderIds: new ObjectId(card._id) } },
+        { returnDocument: "after" }
+      );
+    return result.value || null;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
 export const columnModel = {
   COLUMN_COLLECTION_NAME,
   COLUMN_COLLECTION_SCHEMA,
   createNew,
   findOneByID,
+  pushCardOderIds,
 };
 // boardId: 67ea6a00609bdbb7c46dfbda,
 //columnId: 67ea732d65b019c23d640d11,
