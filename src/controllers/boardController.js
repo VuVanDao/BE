@@ -23,12 +23,19 @@ const getDetail = async (req, res, next) => {
     res.status(StatusCodes.OK).json(board);
   } catch (error) {
     next(error);
-    // res
-    //   .status(StatusCodes.INTERNAL_SERVER_ERROR)
-    //   .json({ errors: error.message });
+  }
+};
+const update = async (req, res, next) => {
+  try {
+    const boardId = req.params.id;
+    const updatedBoard = await BoardService.update(boardId, req.body);
+    res.status(StatusCodes.OK).json(updatedBoard);
+  } catch (error) {
+    next(error);
   }
 };
 export const boardController = {
   createNew,
   getDetail,
+  update,
 };

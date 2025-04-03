@@ -13,5 +13,7 @@ Router.route("/")
     res.status(StatusCodes.OK).json({ Message: "GET:API v1  get all boards" });
   })
   .post(boardValidation.createNew, boardController.createNew);
-Router.route("/:id").get(boardController.getDetail).put();
+Router.route("/:id")
+  .get(boardController.getDetail)
+  .put(boardValidation.update, boardController.update);
 export const boardRouter = Router;

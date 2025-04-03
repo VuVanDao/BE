@@ -101,7 +101,30 @@ const pushColumnOderIds = async (column) => {
         { $push: { columnOrderIds: new ObjectId(column._id) } },
         { returnDocument: "after" }
       );
-    return result.value || null;
+    return result || null;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+const invalidUpdateFields = ["_id", "createdAt"];
+const update = async (boardId, updateData) => {
+  try {
+    Object.keys(updateData).forEach((fieldName) => {
+      if (invalidUpdateFields.includes(fieldName)) {
+        delete updateData[fieldName];
+      }
+    });
+    // console.log("updateData", updateData);
+    const result = await GET_DB()
+      .collection(BOARD_COLLECTION_NAME)
+      .findOneAndUpdate(
+        { _id: new ObjectId(boardId) },
+        { $set: updateData },
+        { returnDocument: "after" }
+      );
+    // console.log("result", result);
+
+    return result || null;
   } catch (error) {
     throw new Error(error);
   }
@@ -113,4 +136,5 @@ export const boardModel = {
   findOneByID,
   getDetail,
   pushColumnOderIds,
+  update,
 };
