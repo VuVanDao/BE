@@ -71,12 +71,37 @@ const pushCardOderIds = async (card) => {
     throw new Error(error);
   }
 };
+const invalidUpdateFields = ["_id", "createdAt", "boardId"];
+
+const update = async (columnId, updateData) => {
+  try {
+    Object.keys(updateData).forEach((fieldName) => {
+      if (invalidUpdateFields.includes(fieldName)) {
+        delete updateData[fieldName];
+      }
+    });
+    // console.log("updateData", updateData);
+    const result = await GET_DB()
+      .collection(COLUMN_COLLECTION_NAME)
+      .findOneAndUpdate(
+        { _id: new ObjectId(columnId) },
+        { $set: updateData },
+        { returnDocument: "after" }
+      );
+    // console.log("result", result);
+
+    return result || null;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
 export const columnModel = {
   COLUMN_COLLECTION_NAME,
   COLUMN_COLLECTION_SCHEMA,
   createNew,
   findOneByID,
   pushCardOderIds,
+  update,
 };
 // boardId: 67ea6a00609bdbb7c46dfbda,
 //columnId: 67ea732d65b019c23d640d11,

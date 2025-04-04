@@ -9,5 +9,8 @@ import { columnValidation } from "~/validations/columnValidation";
 import { columnController } from "~/controllers/columnController";
 const Router = express.Router();
 Router.route("/").post(columnValidation.createNew, columnController.createNew);
-// Router.route("/:id").get(columnController.getDetail).put();
+
+Router.route("/:id")
+  //   .get(columnController.getDetail)
+  .put(columnValidation.update, columnController.update);
 export const columnRouter = Router;
