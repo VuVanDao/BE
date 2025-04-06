@@ -59,9 +59,48 @@ const validateBeforeCreate = async (data) => {
     abortEarly: false,
   });
 };
+const invalidUpdateFields = ["_id", "createdAt", "boardId"];
+
+const update = async (cardId, updateData) => {
+  try {
+    Object.keys(updateData).forEach((fieldName) => {
+      if (invalidUpdateFields.includes(fieldName)) {
+        delete updateData[fieldName];
+      }
+    });
+    if (updateData.columnId) {
+      updateData.columnId = new ObjectId(updateData.columnId);
+    }
+    // console.log("updateData", updateData);
+    const result = await GET_DB()
+      .collection(CARD_COLLECTION_NAME)
+      .findOneAndUpdate(
+        { _id: new ObjectId(cardId) },
+        { $set: updateData },
+        { returnDocument: "after" }
+      );
+    // console.log("result", result);
+
+    return result || null;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+const DeleteManyByColumnId = async (columnId) => {
+  try {
+    const result = await GET_DB()
+      .collection(CARD_COLLECTION_NAME)
+      .deleteMany({ columnId: new ObjectId(columnId) });
+    return result;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
 export const cardModel = {
   CARD_COLLECTION_NAME,
   CARD_COLLECTION_SCHEMA,
   createNew,
   findOneByID,
+  update,
+  DeleteManyByColumnId,
 };

@@ -114,6 +114,11 @@ const update = async (boardId, updateData) => {
         delete updateData[fieldName];
       }
     });
+    if (updateData.columnOrderIds) {
+      updateData.columnOrderIds = updateData.columnOrderIds.map(
+        (_id) => new ObjectId(_id)
+      );
+    }
     // console.log("updateData", updateData);
     const result = await GET_DB()
       .collection(BOARD_COLLECTION_NAME)
@@ -129,6 +134,20 @@ const update = async (boardId, updateData) => {
     throw new Error(error);
   }
 };
+const pullColumnOderIds = async (column) => {
+  try {
+    const result = await GET_DB()
+      .collection(BOARD_COLLECTION_NAME)
+      .findOneAndUpdate(
+        { _id: new ObjectId(column.boardId) },
+        { $pull: { columnOrderIds: new ObjectId(column._id) } },
+        { returnDocument: "after" }
+      );
+    return result || null;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
 export const boardModel = {
   BOARD_COLLECTION_NAME,
   BOARD_COLLECTION_SCHEMA,
@@ -137,4 +156,5 @@ export const boardModel = {
   getDetail,
   pushColumnOderIds,
   update,
+  pullColumnOderIds,
 };

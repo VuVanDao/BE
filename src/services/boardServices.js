@@ -1,6 +1,8 @@
 import { StatusCodes } from "http-status-codes";
 import { cloneDeep } from "lodash";
 import { boardModel } from "~/models/BoardModel";
+import { cardModel } from "~/models/cardModel";
+import { columnModel } from "~/models/columnModel";
 import ApiError from "~/utils/ApiError";
 import slugify from "~/utils/formatter";
 
@@ -17,7 +19,7 @@ const createNew = async (reqBody) => {
     };
     const createdBoard = await boardModel.createNew(newBoard);
     const getNewBoard = await boardModel.findOneByID(createdBoard.insertedId);
-    console.log("getNewBoard", getNewBoard);
+    // console.log("getNewBoard", getNewBoard);
 
     return getNewBoard;
   } catch (error) {
@@ -56,8 +58,24 @@ const update = async (boardId, reqBody) => {
     throw error;
   }
 };
+const moveCardInDifferentColumn = async (reqBody) => {
+  try {
+    await columnModel.update(reqBody.nextColumnId, {
+      cardOrderIds: reqBody.nextCardOrderIds,
+      updatedAt: Date.now(),
+    });
+    await cardModel.update(reqBody.currentCardId, {
+      columnId: reqBody.nextColumnId,
+      updatedAt: Date.now(),
+    });
+    return { updateResult: "Success" };
+  } catch (error) {
+    throw error;
+  }
+};
 export const BoardService = {
   createNew,
   getDetail,
   update,
+  moveCardInDifferentColumn,
 };
