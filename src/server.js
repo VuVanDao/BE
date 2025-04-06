@@ -18,12 +18,20 @@ const start_server = () => {
   app.use(express.json());
   app.use("/v1", APIs_V1);
   app.use(errorHandlingMiddleware);
+  if (env.BUILD_MODE === "production") {
+    app.listen(process.env.PORT, () => {
+      console.log(
+        `production ${env.AUTHOR}, I am running at ${process.env.PORT}`
+      );
+    });
+  } else {
+    app.listen(env.LOCAL_DEV_APP_PORT, () => {
+      console.log(
+        `Hello ${env.AUTHOR}, I am running at ${env.LOCAL_DEV_APP_HOST}:${env.LOCAL_DEV_APP_PORT}`
+      );
+    });
+  }
 
-  app.listen(env.APP_PORT, env.APP_HOST, () => {
-    console.log(
-      `Hello ${env.AUTHOR}, I am running at ${env.APP_HOST}:${env.APP_PORT}`
-    );
-  });
   exitHook(async () => {
     console.log("prepare to close sever and database");
     await CLOSE_DB().then(() => {
