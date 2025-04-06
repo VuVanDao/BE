@@ -5,7 +5,8 @@
  */
 //nhung domain dc phep truy cap toi server
 export const WHITELIST_DOMAINS = [
-  // "http://localhost:5173"
+  // "http://localhost:5173",
+  "https://fe-deploy-tau.vercel.app",
 ];
 export const board_types = {
   public: "public",
