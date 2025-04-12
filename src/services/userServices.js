@@ -6,6 +6,8 @@ import { v4 as uuidv4 } from "uuid";
 import { pickUser } from "~/utils/formatter";
 import { WEBSITE_DOMAIN } from "~/utils/constants";
 import { BrevoProvider } from "~/providers/brevoProvider";
+import { JwtProvider } from "~/providers/jwtProvider";
+import { env } from "~/config/environment";
 const createNew = async (reqBody) => {
   try {
     const existsUser = await userModel.findOneByEmail(reqBody.email);
@@ -37,5 +39,72 @@ const createNew = async (reqBody) => {
     throw error;
   }
 };
+const verifyAccount = async (reqBody) => {
+  try {
+    const existsUser = await userModel.findOneByEmail(reqBody.email);
+    if (!existsUser) {
+      throw new ApiError(StatusCodes.NOT_FOUND, "Your account is not exist");
+    }
+    if (existsUser.isActive) {
+      throw new ApiError(
+        StatusCodes.NOT_ACCEPTABLE,
+        "Your account is already active"
+      );
+    }
+    if (reqBody.token !== existsUser.verifyToken) {
+      throw new ApiError(StatusCodes.NOT_ACCEPTABLE, "Token is invalid");
+    }
+    const updateData = {
+      isActive: true,
+      verifyToken: null,
+    };
+    const updatedUser = await userModel.update(existsUser._id, updateData);
 
-export const userServices = { createNew };
+    return pickUser(updatedUser);
+  } catch (error) {
+    throw error;
+  }
+};
+const login = async (reqBody) => {
+  try {
+    const existsUser = await userModel.findOneByEmail(reqBody.email);
+    if (!existsUser) {
+      throw new ApiError(StatusCodes.NOT_FOUND, "Your account is not exist");
+    }
+    if (!bcryptjs.compareSync(reqBody.password, existsUser.password)) {
+      throw new ApiError(
+        StatusCodes.NOT_ACCEPTABLE,
+        "Your email or password is incorrect"
+      );
+    }
+    if (!existsUser.isActive) {
+      throw new ApiError(
+        StatusCodes.NOT_ACCEPTABLE,
+        "Your account is not active"
+      );
+    }
+
+    // tao token tra ve phia fe
+    //tao thong tin de dinh kem trong jwt: _id va email cua user
+    const userInfo = {
+      _id: existsUser._id,
+      email: existsUser.email,
+    };
+    //tao ra 2 loai token, access token, refresh token
+    const accessToken = await JwtProvider.generateToken(
+      userInfo,
+      env.ACCESS_TOKEN_SECRET_SIGNATURE,
+      env.ACCESS_TOKEN_LIFE
+    );
+    const refreshToken = await JwtProvider.generateToken(
+      userInfo,
+      env.REFRESH_TOKEN_SECRET_SIGNATURE,
+      env.REFRESH_TOKEN_LIFE
+    );
+    return { accessToken, refreshToken, ...pickUser(existsUser) };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const userServices = { createNew, verifyAccount, login };
