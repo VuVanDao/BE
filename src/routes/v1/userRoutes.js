@@ -1,5 +1,4 @@
 import express from "express";
-import { StatusCodes } from "http-status-codes";
 import { userController } from "~/controllers/userController";
 import { userValidation } from "~/validations/userValidation";
 
@@ -14,5 +13,7 @@ Router.route("/verify").put(
   userController.verifyAccount
 );
 Router.route("/login").post(userValidation.login, userController.login);
+Router.route("/logout").delete(userController.logout);
+Router.route("/refresh_token").post(userController.refreshToken);
 
 export const userRoute = Router;

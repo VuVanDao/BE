@@ -100,6 +100,7 @@ const login = async (reqBody) => {
     const refreshToken = await JwtProvider.generateToken(
       userInfo,
       env.REFRESH_TOKEN_SECRET_SIGNATURE,
+      // 15
       env.REFRESH_TOKEN_LIFE
     );
     return { accessToken, refreshToken, ...pickUser(existsUser) };
@@ -107,5 +108,31 @@ const login = async (reqBody) => {
     throw error;
   }
 };
+const refreshToken = async (clientRefreshToken) => {
+  try {
+    //giai ma refreshToken tu client
+    const refreshTokenDecoded = await JwtProvider.verifyToken(
+      clientRefreshToken,
+      env.REFRESH_TOKEN_SECRET_SIGNATURE
+    );
+    // tao token tra ve phia fe
+    //tao thong tin de dinh kem trong jwt: _id va email cua user
+    const userInfo = {
+      _id: refreshTokenDecoded._id,
+      email: refreshTokenDecoded.email,
+    };
+    //tao ra refresh token
+    const accessToken = await JwtProvider.generateToken(
+      userInfo,
+      env.ACCESS_TOKEN_SECRET_SIGNATURE,
+      // 5
+      env.ACCESS_TOKEN_LIFE
+    );
 
-export const userServices = { createNew, verifyAccount, login };
+    return { accessToken };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const userServices = { createNew, verifyAccount, login, refreshToken };
