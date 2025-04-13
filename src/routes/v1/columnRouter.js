@@ -7,11 +7,24 @@ import express from "express";
 
 import { columnValidation } from "~/validations/columnValidation";
 import { columnController } from "~/controllers/columnController";
+import { authMiddleware } from "~/middlewares/authMiddleware";
 const Router = express.Router();
-Router.route("/").post(columnValidation.createNew, columnController.createNew);
+Router.route("/").post(
+  authMiddleware.isAuthorized,
+  columnValidation.createNew,
+  columnController.createNew
+);
 
 Router.route("/:id")
   //   .get(columnController.getDetail)
-  .put(columnValidation.update, columnController.update)
-  .delete(columnValidation.Delete, columnController.Delete);
+  .put(
+    authMiddleware.isAuthorized,
+    columnValidation.update,
+    columnController.update
+  )
+  .delete(
+    authMiddleware.isAuthorized,
+    columnValidation.Delete,
+    columnController.Delete
+  );
 export const columnRouter = Router;

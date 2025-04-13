@@ -12,8 +12,15 @@ import { APIs_V1 } from "./routes/v1";
 import { errorHandlingMiddleware } from "./middlewares/ErrorHandleMiddleware";
 import cors from "cors";
 import { corsOptions } from "./config/cors";
+import cookieParser from "cookie-parser";
 const start_server = () => {
   const app = express();
+  app.use((req, res, next) => {
+    res.set("Cache-Control", "no-store");
+    next();
+  });
+  //cau hinh cookie parser
+  app.use(cookieParser());
   app.use(cors(corsOptions));
   app.use(express.json());
   app.use("/v1", APIs_V1);

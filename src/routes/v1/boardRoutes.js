@@ -6,17 +6,27 @@
 import express from "express";
 import { StatusCodes } from "http-status-codes";
 import { boardController } from "~/controllers/boardController";
+import { authMiddleware } from "~/middlewares/authMiddleware";
 import { boardValidation } from "~/validations/boardValidation";
 const Router = express.Router();
 Router.route("/")
-  .get((req, res) => {
+  .get(authMiddleware.isAuthorized, (req, res) => {
     res.status(StatusCodes.OK).json({ Message: "GET:API v1  get all boards" });
   })
-  .post(boardValidation.createNew, boardController.createNew);
+  .post(
+    authMiddleware.isAuthorized,
+    boardValidation.createNew,
+    boardController.createNew
+  );
 Router.route("/:id")
-  .get(boardController.getDetail)
-  .put(boardValidation.update, boardController.update);
+  .get(authMiddleware.isAuthorized, boardController.getDetail)
+  .put(
+    authMiddleware.isAuthorized,
+    boardValidation.update,
+    boardController.update
+  );
 Router.route("/supports/moving_cards").put(
+  authMiddleware.isAuthorized,
   boardValidation.moveCardInDifferentColumn,
   boardController.moveCardInDifferentColumn
 );
