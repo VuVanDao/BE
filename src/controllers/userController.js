@@ -63,10 +63,20 @@ const refreshToken = async (req, res, next) => {
     next(new ApiError(StatusCodes.FORBIDDEN, "Plz sign in first"));
   }
 };
+const update = async (req, res, next) => {
+  try {
+    const userId = req.jwtDecoded._id;
+    const result = await userServices.update(userId, req.body);
+    res.status(StatusCodes.OK).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
 export const userController = {
   createNew,
   verifyAccount,
   login,
   logout,
   refreshToken,
+  update,
 };

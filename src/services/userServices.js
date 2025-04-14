@@ -8,6 +8,7 @@ import { WEBSITE_DOMAIN } from "~/utils/constants";
 import { BrevoProvider } from "~/providers/brevoProvider";
 import { JwtProvider } from "~/providers/jwtProvider";
 import { env } from "~/config/environment";
+import { pick } from "lodash";
 const createNew = async (reqBody) => {
   try {
     const existsUser = await userModel.findOneByEmail(reqBody.email);
@@ -134,5 +135,46 @@ const refreshToken = async (clientRefreshToken) => {
     throw error;
   }
 };
+const update = async (userId, reqBody) => {
+  try {
+    const existsUser = await userModel.findOneByID(userId);
+    if (!existsUser) {
+      throw new ApiError(StatusCodes.NOT_FOUND, "Your account is not exist");
+    }
+    if (!existsUser.isActive) {
+      throw new ApiError(
+        StatusCodes.NOT_ACCEPTABLE,
+        "Your account is not active"
+      );
+    }
+    let updatedUser = {};
+    //th1:change password
+    if (reqBody.current_password && reqBody.new_password) {
+      if (
+        !bcryptjs.compareSync(reqBody.current_password, existsUser.password)
+      ) {
+        throw new ApiError(
+          StatusCodes.NOT_ACCEPTABLE,
+          "Your email or password is incorrect"
+        );
+      }
+      updatedUser = await userModel.update(userId, {
+        password: bcryptjs.hashSync(reqBody.new_password, 8),
+      });
+    } else {
+      //th2:change other fields
+      updatedUser = await userModel.update(userId, reqBody);
+    }
+    return pickUser(updatedUser);
+  } catch (error) {
+    throw error;
+  }
+};
 
-export const userServices = { createNew, verifyAccount, login, refreshToken };
+export const userServices = {
+  createNew,
+  verifyAccount,
+  login,
+  refreshToken,
+  update,
+};
