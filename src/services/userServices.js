@@ -9,6 +9,7 @@ import { BrevoProvider } from "~/providers/brevoProvider";
 import { JwtProvider } from "~/providers/jwtProvider";
 import { env } from "~/config/environment";
 import { pick } from "lodash";
+import { cloudinaryProvider } from "~/providers/cloudinaryProvider";
 const createNew = async (reqBody) => {
   try {
     const existsUser = await userModel.findOneByEmail(reqBody.email);
@@ -135,7 +136,7 @@ const refreshToken = async (clientRefreshToken) => {
     throw error;
   }
 };
-const update = async (userId, reqBody) => {
+const update = async (userId, reqBody, userAvatarFile) => {
   try {
     const existsUser = await userModel.findOneByID(userId);
     if (!existsUser) {
@@ -161,8 +162,18 @@ const update = async (userId, reqBody) => {
       updatedUser = await userModel.update(userId, {
         password: bcryptjs.hashSync(reqBody.new_password, 8),
       });
+    } else if (userAvatarFile) {
+      const uploadResult = await cloudinaryProvider.StreamUpload(
+        userAvatarFile.buffer,
+        "users"
+      );
+      console.log("🚀 ~ update ~ uploadResult:", uploadResult);
+      //th2:change avatar, upload file len cloudinary
+      updatedUser = await userModel.update(userId, {
+        avatar: uploadResult.secure_url,
+      });
     } else {
-      //th2:change other fields
+      //th3:change other fields
       updatedUser = await userModel.update(userId, reqBody);
     }
     return pickUser(updatedUser);
