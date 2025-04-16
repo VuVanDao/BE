@@ -10,9 +10,7 @@ import { authMiddleware } from "~/middlewares/authMiddleware";
 import { boardValidation } from "~/validations/boardValidation";
 const Router = express.Router();
 Router.route("/")
-  .get(authMiddleware.isAuthorized, (req, res) => {
-    res.status(StatusCodes.OK).json({ Message: "GET:API v1  get all boards" });
-  })
+  .get(authMiddleware.isAuthorized, boardController.getBoards)
   .post(
     authMiddleware.isAuthorized,
     boardValidation.createNew,
