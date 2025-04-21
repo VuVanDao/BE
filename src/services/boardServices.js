@@ -12,13 +12,13 @@ import slugify from "~/utils/formatter";
  * YouTube: https://youtube.com/@trungquandev
  * "A bit of fragrance clings to the hand that gives flowers!"
  */
-const createNew = async (reqBody) => {
+const createNew = async (userId, reqBody) => {
   try {
     const newBoard = {
       ...reqBody,
       slug: slugify(reqBody.title),
     };
-    const createdBoard = await boardModel.createNew(newBoard);
+    const createdBoard = await boardModel.createNew(userId, newBoard);
     const getNewBoard = await boardModel.findOneByID(createdBoard.insertedId);
     // console.log("getNewBoard", getNewBoard);
 
@@ -27,9 +27,9 @@ const createNew = async (reqBody) => {
     throw error;
   }
 };
-const getDetail = async (boardId) => {
+const getDetail = async (userId, boardId) => {
   try {
-    const board = await boardModel.getDetail(boardId);
+    const board = await boardModel.getDetail(userId, boardId);
     if (!board) {
       throw new ApiError(StatusCodes.NOT_FOUND, "Board not found");
     }

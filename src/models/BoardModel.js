@@ -35,12 +35,16 @@ const BOARD_COLLECTION_SCHEMA = Joi.object({
   updatedAt: Joi.date().timestamp("javascript").default(null),
   _destroy: Joi.boolean().default(false),
 });
-const createNew = async (data) => {
+const createNew = async (userId, data) => {
   try {
     const validateData = await validateBeforeCreate(data);
+    const newBoardToAdd = {
+      ...validateData,
+      ownerIds: [new ObjectId(userId)],
+    };
     const createdBoard = await GET_DB()
       .collection(BOARD_COLLECTION_NAME)
-      .insertOne(validateData);
+      .insertOne(newBoardToAdd);
     return createdBoard;
   } catch (error) {
     throw new Error(error);
@@ -57,8 +61,23 @@ const findOneByID = async (id) => {
   }
 };
 // Aggregate: Query tổng hợp de lay column va card thuoc ve board
-const getDetail = async (id) => {
+const getDetail = async (userId, boardId) => {
   try {
+    const queryCondition = [
+      {
+        _destroy: false,
+      },
+      {
+        _id: new ObjectId(boardId),
+      },
+      //nhung userId la admin hoac member cua board
+      {
+        $or: [
+          { ownerIds: { $all: [new ObjectId(userId)] } },
+          { memberIds: { $all: [new ObjectId(userId)] } },
+        ],
+      },
+    ];
     // const result = await GET_DB()
     //   .collection(BOARD_COLLECTION_NAME)
     //   .findOne({ _id: new ObjectId(id) });
@@ -67,8 +86,7 @@ const getDetail = async (id) => {
       .aggregate([
         {
           $match: {
-            _id: new ObjectId(id),
-            _destroy: false,
+            $and: queryCondition,
           },
         },
         {

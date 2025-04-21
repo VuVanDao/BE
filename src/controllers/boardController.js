@@ -7,7 +7,9 @@ import { StatusCodes } from "http-status-codes";
 import { BoardService } from "~/services/boardServices";
 const createNew = async (req, res, next) => {
   try {
-    const createNewBoard = await BoardService.createNew(req.body);
+    const userId = req.jwtDecoded._id;
+
+    const createNewBoard = await BoardService.createNew(userId, req.body);
     res.status(StatusCodes.CREATED).json(createNewBoard);
   } catch (error) {
     next(error);
@@ -18,8 +20,9 @@ const createNew = async (req, res, next) => {
 };
 const getDetail = async (req, res, next) => {
   try {
+    const userId = req.jwtDecoded._id;
     const boardId = req.params.id;
-    const board = await BoardService.getDetail(boardId);
+    const board = await BoardService.getDetail(userId, boardId);
     res.status(StatusCodes.OK).json(board);
   } catch (error) {
     next(error);
