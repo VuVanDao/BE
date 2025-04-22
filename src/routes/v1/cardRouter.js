@@ -14,5 +14,10 @@ Router.route("/").post(
   cardValidation.createNew,
   cardController.createNew
 );
-// Router.route("/:id").get(cardController.getDetail).put();
+
+Router.route("/:id").put(
+  authMiddleware.isAuthorized,
+  cardValidation.update,
+  cardController.update
+);
 export const cardRouter = Router;
