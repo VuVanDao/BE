@@ -10,6 +10,7 @@ import { ObjectId } from "mongodb";
 import { columnModel } from "./columnModel";
 import { cardModel } from "./cardModel";
 import { pagingSkipValue } from "~/utils/algorithms";
+import { userModel } from "./userModel";
 // Define Collection (name & schema)
 const BOARD_COLLECTION_NAME = "boards";
 const BOARD_COLLECTION_SCHEMA = Joi.object({
@@ -103,6 +104,26 @@ const getDetail = async (userId, boardId) => {
             localField: "_id",
             foreignField: "boardId",
             as: "cards",
+          },
+        },
+        {
+          $lookup: {
+            from: userModel.USER_COLLECTION_NAME,
+            localField: "memberIds",
+            foreignField: "_id",
+            as: "members",
+            //dung de xu li 1 or nhieu van de ko can thiet
+            //$project dechi dinh filed khong muon lay bang cach gan giatri = 0
+            pipeline: [{ $project: { password: 0, verifyToken: 0 } }],
+          },
+        },
+        {
+          $lookup: {
+            from: userModel.USER_COLLECTION_NAME,
+            localField: "ownerIds",
+            foreignField: "_id",
+            as: "owners",
+            pipeline: [{ $project: { password: 0, verifyToken: 0 } }],
           },
         },
       ])

@@ -167,7 +167,6 @@ const update = async (userId, reqBody, userAvatarFile) => {
         userAvatarFile.buffer,
         "users"
       );
-      console.log("🚀 ~ update ~ uploadResult:", uploadResult);
       //th2:change avatar, upload file len cloudinary
       updatedUser = await userModel.update(userId, {
         avatar: uploadResult.secure_url,
