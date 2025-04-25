@@ -21,7 +21,7 @@ const createNew = async (reqBody) => {
     throw error;
   }
 };
-const update = async (cardId, reqBody, cardCoverFile) => {
+const update = async (cardId, reqBody, cardCoverFile, userInfo) => {
   try {
     const updateCard = {
       ...reqBody,
@@ -36,6 +36,15 @@ const update = async (cardId, reqBody, cardCoverFile) => {
       updatedCard = await cardModel.update(cardId, {
         cover: uploadResult.secure_url,
       });
+    } else if (updateCard.commentToAdd) {
+      //tao du lieu comment de them vao db, can bo sung de them data can thiet
+      const commentData = {
+        ...updateCard.commentToAdd,
+        userId: userInfo._id,
+        userEmail: userInfo.email,
+        commentAt: Date.now(),
+      };
+      updatedCard = await cardModel.unshiftNewComment(cardId, commentData);
     } else {
       //cac th update chung :title, description , ....
       updatedCard = await cardModel.update(cardId, updateCard);

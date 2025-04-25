@@ -9,6 +9,7 @@ import { boardRouter } from "./boardRoutes";
 import { columnRouter } from "./columnRouter.js";
 import { cardRouter } from "./cardRouter.js";
 import { userRoute } from "./userRoutes";
+import { invitationRoute } from "./invitationRoutes";
 const Router = express.Router();
 Router.get("/status", (req, res) => {
   res.status(StatusCodes.OK).json({ Message: "API v1  are ready to use" });
@@ -22,4 +23,6 @@ Router.use("/columns", columnRouter);
 Router.use("/cards", cardRouter);
 // user api
 Router.use("/users", userRoute);
+//invitationRoute
+Router.use("/invitations", invitationRoute);
 export const APIs_V1 = Router;
