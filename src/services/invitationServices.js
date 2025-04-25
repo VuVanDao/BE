@@ -64,6 +64,26 @@ const createNewBoardInvitation = async (reqBody, inviterId) => {
   }
 };
 
+const getInvitation = async (userId) => {
+  try {
+    const getInvitation = await invitationModel.findByUser(userId);
+    console.log("🚀 ~ getInvitation ~ getInvitation:", getInvitation);
+
+    //vi inviter va invitee va board dang la gia tri cua 1 mang nen doi ve 1 object de de xu li
+    const resInvitations = getInvitation.map((i) => {
+      return {
+        ...i,
+        inviter: i.inviter[0] || {},
+        invitee: i.invitee[0] || {},
+        board: i.board[0] || {},
+      };
+    });
+    return resInvitations;
+  } catch (error) {
+    throw error;
+  }
+};
 export const invitationService = {
   createNewBoardInvitation,
+  getInvitation,
 };

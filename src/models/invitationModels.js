@@ -1,4 +1,6 @@
 import { BOARD_INVITATION_STATUS, INVITATION_TYPES } from "~/utils/constants";
+import { userModel } from "./userModel";
+import { boardModel } from "./BoardModel";
 
 const Joi = require("joi");
 const { ObjectId } = require("mongodb");
@@ -115,10 +117,64 @@ const update = async (invitationId, updateData) => {
     throw new Error(error);
   }
 };
+
+// Aggregate: Query tổng hợp de lay invitation thuoc ve 1 user cu the
+const findByUser = async (userId) => {
+  try {
+    const queryCondition = [
+      {
+        inviteeId: new ObjectId(userId), // tim theo inviteeId
+      },
+    ];
+
+    const results = await GET_DB()
+      .collection(INVITATION_COLLECTION_NAME)
+      .aggregate([
+        {
+          $match: {
+            $and: queryCondition,
+          },
+        },
+        {
+          $lookup: {
+            from: userModel.USER_COLLECTION_NAME,
+            localField: "inviterId", //ng di moi
+            foreignField: "_id",
+            as: "inviter",
+            pipeline: [{ $project: { password: 0, verifyToken: 0 } }],
+          },
+        },
+        {
+          $lookup: {
+            from: userModel.USER_COLLECTION_NAME,
+            localField: "inviteeId", //nguoi dc moi
+            foreignField: "_id",
+            as: "invitee",
+            pipeline: [{ $project: { password: 0, verifyToken: 0 } }],
+          },
+        },
+        {
+          $lookup: {
+            from: boardModel.BOARD_COLLECTION_NAME,
+            localField: "boardInvitation.boardId", //thong tin cua board
+            foreignField: "_id",
+            as: "board",
+          },
+        },
+      ])
+      .toArray();
+    // console.log("results", results);
+
+    return results;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
 export const invitationModel = {
   INVITATION_COLLECTION_NAME,
   INVITATION_COLLECTION_SCHEMA,
   createNewBoardInvitation,
   findOneByID,
   update,
+  findByUser,
 };
