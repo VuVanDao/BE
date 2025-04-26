@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { boardModel } from "~/models/BoardModel";
 import { invitationModel } from "~/models/invitationModels";
 import { userModel } from "~/models/userModel";
+import ApiError from "~/utils/ApiError";
 import { BOARD_INVITATION_STATUS, INVITATION_TYPES } from "~/utils/constants";
 import { pickUser } from "~/utils/formatter";
 
@@ -67,7 +68,7 @@ const createNewBoardInvitation = async (reqBody, inviterId) => {
 const getInvitation = async (userId) => {
   try {
     const getInvitation = await invitationModel.findByUser(userId);
-    console.log("🚀 ~ getInvitation ~ getInvitation:", getInvitation);
+    // console.log("🚀 ~ getInvitation ~ getInvitation:", getInvitation);
 
     //vi inviter va invitee va board dang la gia tri cua 1 mang nen doi ve 1 object de de xu li
     const resInvitations = getInvitation.map((i) => {
@@ -83,7 +84,64 @@ const getInvitation = async (userId) => {
     throw error;
   }
 };
+const updateBoardInvitation = async (userId, invitationId, status) => {
+  try {
+    //tim ban ghi invitation trong model
+    const getInvitation = await invitationModel.findOneByID(invitationId);
+    if (!getInvitation) {
+      throw new ApiError(StatusCodes.NOT_FOUND, "Invitation not found");
+    }
+
+    //sau khi co invitation r thi lay thong tn cua board
+    const boardId = getInvitation.boardInvitation.boardId;
+    const getBoard = await boardModel.findOneByID(boardId);
+    if (!getBoard) {
+      throw new ApiError(StatusCodes.NOT_FOUND, "Board not found");
+    }
+    //kiem tra neu status laf accepted ma userId (invitee) da owner or member cua board roi thoi bao loi
+    //owner va member dang la objectId nen doi ve string
+    const boardOwnerAndMemberIds = [
+      ...getBoard.ownerIds,
+      ...getBoard.memberIds,
+    ].toString();
+    if (
+      status === BOARD_INVITATION_STATUS.ACCEPTED &&
+      boardOwnerAndMemberIds.includes(userId)
+    ) {
+      throw new ApiError(
+        StatusCodes.NOT_ACCEPTABLE,
+        "You are already a member or owner this board."
+      );
+    }
+    //tao du lieu de update ban ghi invitation
+    const updateData = {
+      boardInvitation: {
+        ...getInvitation.boardInvitation,
+        status: status,
+      },
+    };
+
+    //b1: cap nhat status
+    const updateInvitation = await invitationModel.update(
+      invitationId,
+      updateData
+    );
+
+    //b2:accepted thanh cong:them thong tin cua userId vao ban ghi memberIds cua boardId
+    if (
+      updateInvitation.boardInvitation.status ===
+      BOARD_INVITATION_STATUS.ACCEPTED
+    ) {
+      await boardModel.pushMemberIds(boardId, userId);
+    }
+
+    return updateInvitation;
+  } catch (error) {
+    throw error;
+  }
+};
 export const invitationService = {
   createNewBoardInvitation,
   getInvitation,
+  updateBoardInvitation,
 };
