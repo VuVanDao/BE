@@ -11,12 +11,15 @@ const createNewBoardInvitation = async (reqBody, inviterId) => {
     //nguopi moi: chinh la nguoi dang request, lay tu token
     const inviter = await userModel.findOneByID(inviterId);
     // console.log("🚀 ~ createNewBoardInvitation ~ inviter:", inviter);
+
     // Người được mời: lấy theo email nhận từ phía FE
     const invitee = await userModel.findOneByEmail(reqBody.inviteeEmail);
     // console.log("🚀 ~ createNewBoardInvitation ~ invitee:", invitee);
+
     // Tìm luôn cái board ra để lấy data xử lý
     const board = await boardModel.findOneByID(reqBody.boardId);
     // console.log("🚀 ~ createNewBoardInvitation ~ board:", board);
+
     // Nếu khong tồn tại 1 trong 3 thì cứ thẳng tay reject
     if (!invitee || !inviter || !board) {
       throw new ApiError(

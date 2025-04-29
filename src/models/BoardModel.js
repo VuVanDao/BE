@@ -196,7 +196,7 @@ const pullColumnOderIds = async (column) => {
     throw new Error(error);
   }
 };
-const getBoards = async (userId, page, itemPerPage) => {
+const getBoards = async (userId, page, itemPerPage, queryFilter) => {
   try {
     const queryCondition = [
       //dk 01:board chua bi xoa
@@ -211,6 +211,20 @@ const getBoards = async (userId, page, itemPerPage) => {
         ],
       },
     ];
+    //xu ly query cho tung truong hop
+    if (queryFilter) {
+      console.log(Object.keys(queryFilter));
+      Object.keys(queryFilter).forEach((key) => {
+        //phan biet chu hoa chu thuong
+        // queryCondition.push({ [key]: { $regex: queryFilter[key] } });
+
+        //ko phan biet chu hoa chu thuong
+        queryCondition.push({
+          [key]: { $regex: new RegExp(queryFilter[key], "i") },
+        });
+      });
+    }
+    // console.log("🚀 ~ Object.keys ~ queryCondition:", queryCondition);
     const query = await GET_DB()
       .collection(BOARD_COLLECTION_NAME)
       .aggregate(
