@@ -8,7 +8,6 @@ import { WEBSITE_DOMAIN } from "~/utils/constants";
 import { BrevoProvider } from "~/providers/brevoProvider";
 import { JwtProvider } from "~/providers/jwtProvider";
 import { env } from "~/config/environment";
-import { pick } from "lodash";
 import { cloudinaryProvider } from "~/providers/cloudinaryProvider";
 const createNew = async (reqBody) => {
   try {
@@ -87,7 +86,7 @@ const login = async (reqBody) => {
     }
 
     // tao token tra ve phia fe
-    //tao thong tin de dinh kem trong jwt: _id va email cua user
+
     const userInfo = {
       _id: existsUser._id,
       email: existsUser.email,
@@ -105,6 +104,18 @@ const login = async (reqBody) => {
       // 15
       env.REFRESH_TOKEN_LIFE
     );
+    // res.cookie("accessToken", accessToken, {
+    //   httpOnly: true,
+    //   secure: true,
+    //   sameSite: "none",
+    //   maxAge: ms("14 days"), //thoi gian song cua cookie
+    // });
+    // res.cookie("refreshToken", refreshToken, {
+    //   httpOnly: true,
+    //   secure: true,
+    //   sameSite: "none",
+    //   maxAge: ms("14 days"), //thoi gian song cua cookie
+    // });
     return { accessToken, refreshToken, ...pickUser(existsUser) };
   } catch (error) {
     throw error;

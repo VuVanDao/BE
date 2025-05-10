@@ -1,5 +1,6 @@
 import JWT from "jsonwebtoken";
 const generateToken = async (userInfo, secretSignature, tokenLife) => {
+  console.log("🚀 ~ generateToken ~ secretSignature:", secretSignature);
   try {
     return JWT.sign(userInfo, secretSignature, {
       algorithm: "HS256",

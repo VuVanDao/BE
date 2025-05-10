@@ -50,7 +50,7 @@ const getBoards = async (req, res, next) => {
     const userId = req.jwtDecoded._id;
     const { page, itemPerPage, q } = req.query;
     const queryFilter = q;
-    console.log("🚀 ~ getBoards ~ queryFilter:", queryFilter);
+    // console.log("🚀 ~ getBoards ~ queryFilter:", queryFilter);
     const result = await BoardService.getBoards(
       userId,
       page,
